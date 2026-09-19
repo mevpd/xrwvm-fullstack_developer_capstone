@@ -26,7 +26,6 @@ logger = logging.getLogger(__name__)
 @csrf_exempt
 def login_user(request):
     # Get username and password from request.POST dictionary
-    print(request.method)
     if request.method == "GET":
         return redirect("/login/")
 
@@ -45,6 +44,8 @@ def login_user(request):
 @csrf_exempt
 @csrf_exempt
 def registration(request):
+    if request.method == "GET":
+        return redirect("/register/")
     context = {}
 
     # Load JSON data from the request body
