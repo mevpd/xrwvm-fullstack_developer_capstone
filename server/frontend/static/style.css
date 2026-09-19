@@ -122,5 +122,37 @@ img{
     color:#FFF;
     border-radius:50px;
     text-align:center;
-    box-shadow: 2px 2px 3px #999;  
+    box-shadow: 2px 2px 3px #999;
+}
+
+html, body {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.card,
+.card-body,
+.banner {
+  background-color: #121212 !important;
+  border-color: #444 !important;
+}
+
+h1, h2, h3, h4, h5, h6, p, span, a, label, li, td, th, .card-text {
+  color: #ffffff !important;
+}
+
+a {
+  color: #7fd4ff !important;
+}
+
+.title {
+  background-color: #2a2a2a !important;
+  color: #ffffff !important;
+}
+
+.navbar-light .navbar-brand,
+.navbar-light .nav-link,
+.navbar-light .navbar-text,
+.navbar-light .navbar-nav .nav-link {
+  color: #ffffff !important;
 }

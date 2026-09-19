@@ -13,7 +13,8 @@ from django.contrib.auth import login, authenticate
 import logging
 import json
 from django.views.decorators.csrf import csrf_exempt
-# from .populate import initiate
+from .models import Dealer, Review, CarModel
+from .restapis import analyze_review_sentiments, get_request
 
 
 # Get an instance of a logger
@@ -81,26 +82,72 @@ def registration(request):
 def logout_request(request):
     data = {"userName": ""}
     return JsonResponse(data)
-# ...
-
-# Create a `registration` view to handle sign up request
-# @csrf_exempt
-# def registration(request):
     
 
-# # Update the `get_dealerships` view to render the index page with
-# a list of dealerships
-# def get_dealerships(request):
-# ...
+def fetch_all_dealers():
+    data = get_request('/fetchDealers')
+    if data is None:
+        return []
+    return [{
+        'id': d['id'],
+        'full_name': d['full_name'],
+        'city': d['city'],
+        'address': d['address'],
+        'zip': d['zip'],
+        'state': d['state'],
+    } for d in data]
 
-# Create a `get_dealer_reviews` view to render the reviews of a dealer
-# def get_dealer_reviews(request,dealer_id):
-# ...
 
-# Create a `get_dealer_details` view to render the dealer details
-# def get_dealer_details(request, dealer_id):
-# ...
+def get_dealerships(request):
+    return JsonResponse({"dealers": fetch_all_dealers(), "status": 200})
 
-# Create a `add_review` view to submit a review
-# def add_review(request):
-# ...
+
+def get_dealer_details(request, dealer_id):
+    all_dealers = fetch_all_dealers()
+    dealers = [d for d in all_dealers if d['id'] == int(dealer_id)]
+    return JsonResponse({"dealer": dealers, "status": 200})
+
+
+def get_dealer_reviews(request, dealer_id):
+    reviews = Review.objects.filter(dealer_id=dealer_id).select_related('user_profile')
+    out = [{
+        'review': r.review,
+        'sentiment': r.sentiment,
+        'car_make': r.car_make,
+        'car_model': r.car_model,
+        'car_year': r.car_year,
+        'name': r.user_profile.get_full_name() or r.user_profile.username,
+    } for r in reviews]
+    return JsonResponse({"reviews": out, "status": 200})
+
+
+def get_cars(request):
+    cars = CarModel.objects.select_related('car_make').values('car_make__name', 'name')
+    out = [{"CarMake": c['car_make__name'], "CarModel": c['name']} for c in cars]
+    return JsonResponse({"CarModels": out, "status": 200})
+
+
+@csrf_exempt
+def add_review(request):
+    data = json.loads(request.body)
+    dealer_id = data['dealership']
+    username = request.session.get('username') or data.get('name')
+
+    user = User.objects.filter(username=username).first()
+    if user is None:
+        return JsonResponse({"status": 401, "error": "Not authenticated"}, status=401)
+
+    sentiment = analyze_review_sentiments(data['review'])
+
+    Review.objects.create(
+        user_profile=user,
+        dealer_id=dealer_id,
+        review=data['review'],
+        purchase=data.get('purchase', False),
+        purchase_date=data.get('purchase_date'),
+        car_make=data.get('car_make'),
+        car_model=data.get('car_model'),
+        car_year=data.get('car_year'),
+        sentiment=sentiment,
+    )
+    return JsonResponse({"status": 200})

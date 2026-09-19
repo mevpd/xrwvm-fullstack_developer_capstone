@@ -17,4 +17,5 @@ COPY . .
 EXPOSE 5001
 
 # Start the application
-CMD ["npm", "run", "build"]
+# CMD ["npm", "run", "build"]
+RUN npm run build

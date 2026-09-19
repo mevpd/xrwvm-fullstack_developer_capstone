@@ -6,23 +6,16 @@ import review_icon from "../assets/reviewicon.png"
 
 const Dealers = () => {
   const [dealersList, setDealersList] = useState([]);
-  // let [state, setState] = useState("")
+  const [allDealers, setAllDealers] = useState([]);
   let [states, setStates] = useState([])
 
-  // let root_url = window.location.origin
   let dealer_url ="/djangoapp/get_dealers";
-  
-  let dealer_url_by_state = "/djangoapp/get_dealers/";
- 
-  const filterDealers = async (state) => {
-    dealer_url_by_state = dealer_url_by_state+state;
-    const res = await fetch(dealer_url_by_state, {
-      method: "GET"
-    });
-    const retobj = await res.json();
-    if(retobj.status === 200) {
-      let state_dealers = Array.from(retobj.dealers)
-      setDealersList(state_dealers)
+
+  const filterDealers = (state) => {
+    if(state === "All") {
+      setDealersList(allDealers)
+    } else {
+      setDealersList(allDealers.filter((d) => d.state === state))
     }
   }
 
@@ -39,6 +32,7 @@ const Dealers = () => {
       });
 
       setStates(Array.from(new Set(states)))
+      setAllDealers(all_dealers)
       setDealersList(all_dealers)
     }
   }
