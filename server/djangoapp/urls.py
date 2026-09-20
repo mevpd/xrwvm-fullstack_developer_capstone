@@ -6,8 +6,9 @@ from . import views
 app_name = 'djangoapp'
 urlpatterns = [
     path('get_dealers', views.get_dealerships, name='get_dealers'),
+    path(route='get_dealers/<str:state>', view=views.get_dealerships, name='get_dealers_by_state'),
     path('dealer/<int:dealer_id>', views.get_dealer_details, name='get_dealer_details'),
-    path('reviews/dealer/<int:dealer_id>', views.get_dealer_reviews, name='get_dealer_reviews'),
+    path('reviews/<int:dealer_id>', views.get_dealer_reviews, name='get_dealer_reviews'),
     path('get_cars', views.get_cars, name='get_cars'),
     path('add_review', views.add_review, name='add_review'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

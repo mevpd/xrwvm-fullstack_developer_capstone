@@ -14,7 +14,7 @@ import logging
 import json
 from django.views.decorators.csrf import csrf_exempt
 from .models import Dealer, Review, CarModel, CarMake
-from .restapis import analyze_review_sentiments, get_request
+from .restapis import analyze_review_sentiments, get_request, post_review
 
 
 # Get an instance of a logger
@@ -98,8 +98,13 @@ def fetch_all_dealers():
     } for d in data]
 
 
-def get_dealerships(request):
-    return JsonResponse({"dealers": fetch_all_dealers(), "status": 200})
+def get_dealerships(request, state="All"):
+    if(state == "All"):
+        endpoint = "/fetchDealers"
+    else:
+        endpoint = "/fetchDealers/"+state
+    dealerships = get_request(endpoint)
+    return JsonResponse({"status":200,"dealers":dealerships})
 
 
 def get_dealer_details(request, dealer_id):
@@ -109,16 +114,16 @@ def get_dealer_details(request, dealer_id):
 
 
 def get_dealer_reviews(request, dealer_id):
-    reviews = Review.objects.filter(dealer_id=dealer_id).select_related('user_profile')
-    out = [{
-        'review': r.review,
-        'sentiment': r.sentiment,
-        'car_make': r.car_make,
-        'car_model': r.car_model,
-        'car_year': r.car_year,
-        'name': r.user_profile.get_full_name() or r.user_profile.username,
-    } for r in reviews]
-    return JsonResponse({"reviews": out, "status": 200})
+    # if dealer id has been provided
+    if(dealer_id):
+        endpoint = "/fetchReviews/dealer/"+str(dealer_id)
+        reviews = get_request(endpoint)
+        for review_detail in reviews:
+            response = analyze_review_sentiments(review_detail['review'])
+            print(response)
+        return JsonResponse({"status":200,"reviews":reviews})
+    else:
+        return JsonResponse({"status":400,"message":"Bad Request"})
 
 
 def get_cars(request):
@@ -129,25 +134,13 @@ def get_cars(request):
 
 @csrf_exempt
 def add_review(request):
-    data = json.loads(request.body)
-    dealer_id = data['dealership']
-    username = request.session.get('username') or data.get('name')
-
-    user = User.objects.filter(username=username).first()
-    if user is None:
-        return JsonResponse({"status": 401, "error": "Not authenticated"}, status=401)
-
-    sentiment = analyze_review_sentiments(data['review'])
-
-    Review.objects.create(
-        user_profile=user,
-        dealer_id=dealer_id,
-        review=data['review'],
-        purchase=data.get('purchase', False),
-        purchase_date=data.get('purchase_date'),
-        car_make=data.get('car_make'),
-        car_model=data.get('car_model'),
-        car_year=data.get('car_year'),
-        sentiment=sentiment,
-    )
-    return JsonResponse({"status": 200})
+    if(request.user.is_anonymous == False):
+        data = json.loads(request.body)
+        try:
+            response = post_review(data)
+            print(response)
+            return JsonResponse({"status":200})
+        except:
+            return JsonResponse({"status":401,"message":"Error in posting review"})
+    else:
+        return JsonResponse({"status":403,"message":"Unauthorized"})

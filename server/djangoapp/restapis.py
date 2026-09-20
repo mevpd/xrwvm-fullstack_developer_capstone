@@ -30,7 +30,17 @@ def analyze_review_sentiments(text):
     try:
         response = requests.get(request_url)
         if response.status_code == 200:
-            return response.json().get('sentiment', 'neutral')
+            # return response.json().get('sentiment', 'neutral')
+            return response.json()
     except requests.RequestException as e:
         logger.error(f"Sentiment analysis failed: {e}")
     return "neutral"
+
+def post_review(data_dict):
+    request_url = backend_url+"/insert_review"
+    try:
+        response = requests.post(request_url,json=data_dict)
+        print(response.json())
+        return response.json()
+    except:
+        print("Network exception occurred")
