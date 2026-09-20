@@ -26,7 +26,8 @@ def get_request(endpoint, **kwargs):
 
 
 def analyze_review_sentiments(text):
-    request_url = sentiment_analyzer_url + "analyze/" + text.replace(" ", "%20")
+    request_url = (
+        sentiment_analyzer_url + "analyze/" + text.replace(" ", "%20"))
     try:
         response = requests.get(request_url)
         if response.status_code == 200:
@@ -36,11 +37,12 @@ def analyze_review_sentiments(text):
         logger.error(f"Sentiment analysis failed: {e}")
     return "neutral"
 
+
 def post_review(data_dict):
-    request_url = backend_url+"/insert_review"
+    request_url = backend_url + "/insert_review"
     try:
-        response = requests.post(request_url,json=data_dict)
+        response = requests.post(request_url, json=data_dict)
         print(response.json())
         return response.json()
-    except:
+    except requests.RequestException:
         print("Network exception occurred")

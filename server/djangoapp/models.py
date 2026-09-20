@@ -22,7 +22,8 @@ class CarModel(models.Model):
         ('Truck', 'Truck'),
     )
     car_type = models.CharField(max_length=20, choices=CAR_TYPES)
-    year = models.IntegerField(validators=[MinValueValidator(2015), MaxValueValidator(2023)])
+    year = models.IntegerField(
+        validators=[MinValueValidator(2015), MaxValueValidator(2023)])
 
     def __str__(self):
         return f"{self.car_make.name} {self.name}"
