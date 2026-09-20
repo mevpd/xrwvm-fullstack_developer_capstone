@@ -29,6 +29,7 @@ urlpatterns = [
     path('contact/', TemplateView.as_view(template_name="Contact.html")),
     path('dealers/', TemplateView.as_view(template_name="index.html")),
     path('register/', TemplateView.as_view(template_name="index.html")),
+    path('dealer/<int:dealer_id>',TemplateView.as_view(template_name="index.html")),
     path(route='login', view=views.login_user, name='login'),
     path(route='register', view=views.registration, name='register'),
     path(route='logout', view=views.logout_request, name='logout'),
