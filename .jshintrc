@@ -1,0 +1,9 @@
+{
+  "esversion": 8,
+  "node": true,
+  "asi": true,
+  "quotmark": false,
+  "expr": true,
+  "unused": "vars",
+  "sub": true
+}

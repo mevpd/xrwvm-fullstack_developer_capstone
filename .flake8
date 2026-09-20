@@ -1,0 +1,8 @@
+[flake8]
+exclude =
+    */migrations/*,
+    .venv,
+    ttsenv,
+    node_modules,
+    build
+max-line-length = 79
